@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="ชำระเงิน — กรอกข้อมูลจัดส่งและสรุปคำสั่งซื้อ ร้านหนังสือ รัตน์" />
+  <title>ชำระเงิน | ร้านหนังสือ รัตน์</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- ========== HEADER ========== -->
+  <header class="site-header">
+    <a href="index.html" class="brand">
+      <div class="logo-mark">ร</div>
+      <div class="brand-text">
+        <h1>ร้านหนังสือ รัตน์</h1>
+        <p>ขั้นตอนชำระเงิน</p>
+      </div>
+    </a>
+
+    <button class="nav-toggle" id="navToggle" aria-label="เปิด/ปิดเมนู" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+
+    <nav class="main-nav" aria-label="เมนูหลัก">
+      <a href="index.html">หน้าร้าน</a>
+      <a href="manage.html">จัดการหนังสือ</a>
+      <a href="shipping.html" class="active">ชำระเงิน</a>
+      <a href="order-status.html">ตรวจสอบสถานะ</a>
+      <a href="tracking.html">ติดตามพัสดุ</a>
+    </nav>
+
+    <a class="manage-link" href="index.html">← กลับหน้าร้าน</a>
+  </header>
+
+  <!-- ========== STATUS ========== -->
+  <div class="status-banner info" id="statusMessage" role="status">กำลังโหลดข้อมูลตะกร้า...</div>
+
+  <!-- ========== CHECKOUT LAYOUT ========== -->
+  <div class="shipping-layout">
+
+    <!-- FORM -->
+    <section class="shipping-form-panel">
+      <h2>📦 ข้อมูลผู้รับและที่อยู่จัดส่ง</h2>
+      <form id="shippingForm">
+        <div class="form-group">
+          <label for="recipientName">ชื่อผู้รับ</label>
+          <input id="recipientName" type="text" required placeholder="ชื่อ-นามสกุล ผู้รับ" />
+        </div>
+
+        <div class="form-group">
+          <label for="recipientPhone">เบอร์โทรศัพท์</label>
+          <input id="recipientPhone" type="tel" required placeholder="089-000-0000" />
+        </div>
+
+        <div class="form-group">
+          <label for="recipientAddress">ที่อยู่จัดส่ง</label>
+          <textarea id="recipientAddress" rows="4" required placeholder="บ้านเลขที่ ซอย ถนน ตำบล อำเภอ จังหวัด รหัสไปรษณีย์"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="note">หมายเหตุ (ถ้ามี)</label>
+          <textarea id="note" rows="3" placeholder="หมายเหตุเพิ่มเติม เช่น เวลาจัดส่ง หรือข้อความถึงผู้ส่ง"></textarea>
+        </div>
+
+        <!-- ══ PAYMENT METHOD ══ -->
+        <div class="form-group">
+          <label>💳 เลือกวิธีชำระเงิน</label>
+          <div class="payment-options">
+
+            <label class="payment-card" for="paycod">
+              <input type="radio" id="paycod" name="paymentMethod" value="cod" checked />
+              <div class="payment-card-inner">
+                <span class="pay-icon">🏠</span>
+                <div>
+                  <div class="pay-title">เก็บเงินปลายทาง</div>
+                  <div class="pay-desc">ชำระเงินสดเมื่อรับสินค้า (COD)</div>
+                </div>
+                <span class="pay-check">✓</span>
+              </div>
+            </label>
+
+            <label class="payment-card" for="paynow">
+              <input type="radio" id="paynow" name="paymentMethod" value="transfer" />
+              <div class="payment-card-inner">
+                <span class="pay-icon">💳</span>
+                <div>
+                  <div class="pay-title">โอนเงิน / จ่ายเลย</div>
+                  <div class="pay-desc">โอนผ่าน PromptPay หรือธนาคาร</div>
+                </div>
+                <span class="pay-check">✓</span>
+              </div>
+            </label>
+
+          </div>
+
+          <!-- QR / bank info shown when โอนเงิน selected -->
+          <div class="transfer-info" id="transferInfo" hidden>
+            <div class="transfer-box">
+              <!-- PromptPay QR Code -->
+              <div class="qr-wrapper">
+                <canvas id="promptpayQR"></canvas>
+                <p class="qr-label">📸 สแกน QR ผ่าน PromptPay</p>
+              </div>
+              <div class="bank-details">
+                <p>📱 <strong>PromptPay:</strong> 062-193-4749 (เจ็ด)</p>
+                <p>🏦 <strong>กรุงไทย:</strong> 412-0-98654-3</p>
+                <p class="transfer-note">กรุณาแนบสลิปโอนเงินผ่านช่องทางไลน์: @ratbookstore</p>
+                <div class="receipt-upload">
+                  <label for="receiptInput" style="display:block;margin-top:10px;font-weight:600;">อัปโหลดสลิปการโอน (ถ้ามี)</label>
+                  <input id="receiptInput" type="file" accept="image/*" />
+                  <div id="receiptPreviewWrapper" style="margin-top:8px;">
+                    <img id="receiptPreview" alt="สลิปการโอน" style="max-width:180px;display:none;border-radius:8px;border:1px solid rgba(255,255,255,0.06);" />
+                    <div id="receiptStatus" style="font-size:0.85rem;color:var(--text-muted);margin-top:6px;">ยังไม่มีสลิปที่อัปโหลด</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-primary" id="submitBtn">✅ ยืนยันการสั่งซื้อ</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- ORDER SUMMARY -->
+    <aside class="shipping-summary" aria-label="สรุปคำสั่งซื้อ">
+      <h2>🧾 สรุปคำสั่งซื้อ</h2>
+      <div id="shippingSummary">
+        <p style="color:var(--text-muted);font-size:0.9rem;">ยังไม่มีสินค้าในตะกร้า</p>
+      </div>
+      <div class="cart-footer">
+        <div class="order-total-box">
+          <span class="label">ยอดรวมทั้งหมด</span>
+          <span class="value" id="shippingTotal">0 บาท</span>
+        </div>
+      </div>
+    </aside>
+
+  </div>
+
+  <!-- ========== FOOTER ========== -->
+  <footer class="site-footer">
+    <div class="footer-brand">
+      <div class="logo-mark">ร</div>
+      <strong>ร้านหนังสือ รัตน์</strong>
+    </div>
+    <p>© 2026 ร้านหนังสือ รัตน์ · จัดส่งทั่วประเทศ</p>
+  </footer>
+
+  <script src="supabase.min.js"></script>
+  <script src="shipping.js"></script>
+  <script src="nav-toggle.js"></script>
+  <script src="qrcode.min.js"></script>
+  <style>
+    /* ── Payment Method Cards ── */
+    .payment-options {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .payment-card {
+      cursor: pointer;
+      display: block;
+    }
+
+    .payment-card input[type="radio"] {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .payment-card-inner {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px 18px;
+      border: 2px solid var(--glass-border);
+      border-radius: var(--radius-md);
+      background: var(--glass);
+      transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+      position: relative;
+    }
+
+    .payment-card input:checked + .payment-card-inner {
+      border-color: var(--gold);
+      background: rgba(201,169,110,0.08);
+      box-shadow: 0 0 0 3px rgba(201,169,110,0.12);
+    }
+
+    .payment-card-inner:hover {
+      border-color: rgba(201,169,110,0.4);
+      background: rgba(255,255,255,0.07);
+    }
+
+    .pay-icon {
+      font-size: 1.8rem;
+      flex-shrink: 0;
+    }
+
+    .pay-title {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--text);
+    }
+
+    .pay-desc {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .pay-check {
+      margin-left: auto;
+      font-size: 1.1rem;
+      color: var(--gold);
+      opacity: 0;
+      transition: opacity 0.2s;
+      font-weight: 700;
+    }
+
+    .payment-card input:checked + .payment-card-inner .pay-check {
+      opacity: 1;
+    }
+
+    /* Transfer info box */
+    .transfer-info { margin-top: 10px; }
+
+    .transfer-box {
+      background: rgba(100,150,255,0.07);
+      border: 1px solid rgba(100,150,255,0.2);
+      border-radius: var(--radius-md);
+      padding: 16px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      font-size: 0.88rem;
+      color: var(--text-soft);
+    }
+
+    /* QR Code */
+    .qr-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 0 6px;
+    }
+
+    #promptpayQR {
+      background: #fff;
+      border-radius: 12px;
+      padding: 10px;
+      width: 200px;
+      height: 200px;
+      display: block;
+    }
+
+    .qr-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    .bank-details {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      border-top: 1px solid rgba(255,255,255,0.07);
+      padding-top: 10px;
+    }
+
+    .transfer-note {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    [hidden] { display: none !important; }
+
+    /* COD / Transfer badge on submit button */
+    #submitBtn[data-pay="transfer"] {
+      background: linear-gradient(135deg, #6496ff, #8ab4ff);
+      color: #0a0e1a;
+    }
+  </style>
+  <script>
+    /* ══ PromptPay EMVCo payload builder ══ */
+    function crc16ccitt(str) {
+      var crc = 0xFFFF;
+      for (var i = 0; i < str.length; i++) {
+        crc ^= str.charCodeAt(i) << 8;
+        for (var j = 0; j < 8; j++) {
+          crc = (crc & 0x8000) ? (crc << 1) ^ 0x1021 : crc << 1;
+          crc &= 0xFFFF;
+        }
+      }
+      return crc;
+    }
+
+    function tlv(tag, val) {
+      var len = String(val.length).padStart(2, '0');
+      return tag + len + val;
+    }
+
+    function buildPromptPayPayload(phone) {
+      // Normalize: 0621934749 → 0066621934749
+      var digits = phone.replace(/\D/g, '');
+      var normalized = digits.startsWith('0') ? '0066' + digits.slice(1) : '0066' + digits;
+
+      var merchantInfo = tlv('00', 'A000000677010111') + tlv('01', normalized);
+      var payload =
+        tlv('00', '01') +       // Format indicator
+        tlv('01', '11') +       // Static QR
+        tlv('29', merchantInfo) +
+        tlv('52', '0000') +     // MCC
+        tlv('53', '764') +      // THB
+        tlv('58', 'TH') +       // Country
+        tlv('59', 'Jed') +      // Merchant name
+        tlv('60', 'Bangkok') +  // City
+        '6304';                 // CRC placeholder tag
+
+      var crc = crc16ccitt(payload).toString(16).toUpperCase().padStart(4, '0');
+      return payload + crc;
+    }
+
+    function renderQR() {
+      var canvas = document.getElementById('promptpayQR');
+      if (!canvas) return;
+      var payload = buildPromptPayPayload('0621934749');
+      ensureQRCodeLoaded().then(function() {
+          try {
+            QRCode.toCanvas(canvas, payload, {
+              width: 200,
+              margin: 1,
+              color: { dark: '#0d0d12', light: '#ffffff' }
+            }, function(err) {
+              if (err) {
+                console.error('QR render error:', err);
+                // fallback to data URL
+                QRCode.toDataURL(payload).then(function(dataUrl) {
+                  replaceCanvasWithImage(canvas, dataUrl);
+                }).catch(function(e) { console.error('toDataURL failed', e); });
+                return;
+              }
+              // verify canvas not blank by sampling center pixel
+              try {
+                var ctx = canvas.getContext('2d');
+                var w = canvas.width, h = canvas.height;
+                var px = ctx.getImageData(Math.floor(w/2), Math.floor(h/2), 1, 1).data;
+                var isWhite = px[0] === 255 && px[1] === 255 && px[2] === 255;
+                if (isWhite) {
+                  // likely blank — fallback to image
+                  QRCode.toDataURL(payload).then(function(dataUrl) {
+                    replaceCanvasWithImage(canvas, dataUrl);
+                  }).catch(function(e) { console.error('toDataURL failed', e); });
+                }
+              } catch (e) {
+                // reading pixels failed; ignore
+              }
+            });
+          } catch (e) {
+            console.error('QR render exception:', e);
+            QRCode.toDataURL(payload).then(function(dataUrl) {
+              replaceCanvasWithImage(canvas, dataUrl);
+            }).catch(function(err){ console.error('toDataURL fallback failed', err); });
+          }
+      }).catch(function(err) {
+        console.error('Failed to load QR library', err);
+      });
+    }
+
+    function ensureQRCodeLoaded() {
+      return new Promise(function(resolve, reject) {
+        if (typeof QRCode !== 'undefined') return resolve();
+        // Prefer an existing local script tag (qrcode.min.js) or any qrcode package script
+        var existing = document.querySelector('script[src*="qrcode.min.js"], script[src*="qrcode@"]');
+        if (existing) {
+          if (existing.getAttribute('data-loaded') === 'true' || typeof QRCode !== 'undefined') return resolve();
+          existing.addEventListener('load', function() {
+            existing.setAttribute('data-loaded', 'true');
+            resolve();
+          });
+          existing.addEventListener('error', function(e) { reject(e); });
+          return;
+        }
+
+        // Try loading local file first, then fallback to CDN if that fails
+        var tryLocal = function() {
+          return new Promise(function(res, rej) {
+            var s = document.createElement('script');
+            s.src = 'qrcode.min.js';
+            s.async = true;
+            s.addEventListener('load', function() { s.setAttribute('data-loaded', 'true'); res(); });
+            s.addEventListener('error', function(e) { rej(e); });
+            document.head.appendChild(s);
+          });
+        };
+
+        var tryCDN = function() {
+          return new Promise(function(res, rej) {
+            var s2 = document.createElement('script');
+            s2.src = 'https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js';
+            s2.async = true;
+            s2.addEventListener('load', function() { s2.setAttribute('data-loaded', 'true'); res(); });
+            s2.addEventListener('error', function(e) { rej(e); });
+            document.head.appendChild(s2);
+          });
+        };
+
+        tryLocal().then(resolve).catch(function() {
+          tryCDN().then(resolve).catch(reject);
+        });
+      });
+    }
+
+    function replaceCanvasWithImage(canvas, dataUrl) {
+      try {
+        canvas.style.display = 'none';
+        var img = document.createElement('img');
+        img.src = dataUrl;
+        img.alt = 'PromptPay QR';
+        img.style.width = canvas.style.width || canvas.width + 'px';
+        img.style.height = canvas.style.height || canvas.height + 'px';
+        img.id = 'promptpayQR_img';
+        canvas.parentNode.insertBefore(img, canvas.nextSibling);
+      } catch (e) {
+        console.error('replaceCanvasWithImage failed', e);
+      }
+    }
+
+    /* Show/hide transfer info + render QR */
+    document.querySelectorAll('input[name="paymentMethod"]').forEach(function(radio) {
+      radio.addEventListener('change', function() {
+        var info = document.getElementById('transferInfo');
+        var btn  = document.getElementById('submitBtn');
+        if (this.value === 'transfer') {
+          info.hidden = false;
+          btn.textContent = '💳 ยืนยัน — โอนเงิน';
+          btn.dataset.pay = 'transfer';
+          renderQR();
+        } else {
+          info.hidden = true;
+          btn.textContent = '✅ ยืนยันการสั่งซื้อ';
+          delete btn.dataset.pay;
+        }
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="ติดตามสถานะการจัดส่ง — ตรวจสอบคำสั่งซื้อและสถานะพัสดุ ร้านหนังสือ รัตน์" />
+  <title>ติดตามการจัดส่ง | ร้านหนังสือ รัตน์</title>
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    /* ── Tracking-specific styles ── */
+    .tracking-page-wrapper {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 28px 20px 60px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .page-heading {
+      margin-bottom: 28px;
+    }
+
+    .page-heading .eyebrow { margin-bottom: 8px; }
+
+    .page-heading h2 {
+      font-size: clamp(1.6rem, 3vw, 2.2rem);
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .page-heading h2 span {
+      background: linear-gradient(135deg, var(--gold-light), var(--amber));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .page-heading p { color: var(--text-muted); font-size: 0.95rem; }
+
+    /* Search bar */
+    .search-box {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+
+    .search-box input {
+      flex: 1;
+      padding: 14px 20px;
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-md);
+      font-size: 0.95rem;
+      font-family: 'Sarabun', sans-serif;
+      color: var(--text);
+      outline: none;
+      transition: border-color var(--transition), background var(--transition);
+    }
+
+    .search-box input::placeholder { color: var(--text-muted); }
+    .search-box input:focus { border-color: var(--gold); background: rgba(255,255,255,0.07); }
+
+    /* Filter chips row */
+    .filter-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 28px;
+    }
+
+    /* Stats row */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .stat-card {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transition: border-color var(--transition);
+    }
+
+    .stat-card:hover { border-color: rgba(201,169,110,0.3); }
+
+    .stat-card .stat-icon {
+      font-size: 1.5rem;
+      margin-bottom: 2px;
+    }
+
+    .stat-card .stat-value {
+      font-size: 1.8rem;
+      font-weight: 700;
+      font-family: 'Noto Serif Thai', serif;
+      color: var(--gold-light);
+    }
+
+    .stat-card .stat-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      letter-spacing: 0.03em;
+    }
+
+    /* Order card wrapper */
+    .orders-list {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Individual order card */
+    .order-card {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      transition: border-color var(--transition), box-shadow var(--transition);
+      animation: fadeInUp 0.35s ease both;
+    }
+
+    .order-card:hover {
+      border-color: rgba(201,169,110,0.3);
+      box-shadow: 0 12px 36px rgba(0,0,0,0.35);
+    }
+
+    /* Card header */
+    .order-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--glass-border);
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .order-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .order-id {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+    }
+
+    .order-recipient {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .order-phone {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .order-header-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px;
+    }
+
+    /* Status badge */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 99px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      cursor: pointer;
+      transition: opacity var(--transition);
+    }
+
+    .status-badge:hover { opacity: 0.8; }
+
+    .status-badge::before {
+      content: '●';
+      font-size: 0.55rem;
+    }
+
+    .status-pending {
+      background: rgba(245,166,35,0.15);
+      border: 1px solid rgba(245,166,35,0.3);
+      color: var(--amber);
+    }
+
+    .status-packing {
+      background: rgba(100,150,255,0.12);
+      border: 1px solid rgba(100,150,255,0.25);
+      color: #8ab4ff;
+    }
+
+    .status-shipped {
+      background: rgba(160,100,255,0.12);
+      border: 1px solid rgba(160,100,255,0.25);
+      color: #c49dff;
+    }
+
+    .status-delivered {
+      background: rgba(80,200,120,0.12);
+      border: 1px solid rgba(80,200,120,0.25);
+      color: #6dd99a;
+    }
+
+    .status-cancelled {
+      background: rgba(224,92,122,0.1);
+      border: 1px solid rgba(224,92,122,0.25);
+      color: var(--rose);
+    }
+
+    .order-total-badge {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--gold-light);
+    }
+
+    /* Card body - timeline & items */
+    .order-card-body {
+      padding: 24px;
+    }
+
+    /* Timeline */
+    .timeline {
+      display: flex;
+      align-items: flex-start;
+      gap: 0;
+      margin-bottom: 24px;
+      position: relative;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      top: 18px;
+      left: 18px;
+      right: 18px;
+      height: 2px;
+      background: var(--glass-border);
+      z-index: 0;
+    }
+
+    .timeline-step {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .step-circle {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 2px solid var(--glass-border);
+      background: var(--bg2);
+      display: grid;
+      place-items: center;
+      font-size: 1rem;
+      transition: all var(--transition);
+    }
+
+    .step-circle.done {
+      border-color: var(--gold);
+      background: rgba(201,169,110,0.15);
+      box-shadow: 0 0 0 4px rgba(201,169,110,0.1);
+    }
+
+    .step-circle.active {
+      border-color: var(--amber);
+      background: rgba(245,166,35,0.15);
+      box-shadow: 0 0 12px rgba(245,166,35,0.3);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 4px rgba(245,166,35,0.15); }
+      50%       { box-shadow: 0 0 0 8px rgba(245,166,35,0.05); }
+    }
+
+    .step-label {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      text-align: center;
+      line-height: 1.3;
+    }
+
+    .step-label.done  { color: var(--gold); }
+    .step-label.active { color: var(--amber); font-weight: 600; }
+
+    /* Items summary */
+    .order-items-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: var(--bg2);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: background var(--transition);
+      font-size: 0.88rem;
+      color: var(--text-soft);
+      user-select: none;
+    }
+
+    .order-items-toggle:hover { background: rgba(255,255,255,0.07); }
+
+    .order-items-toggle .chevron {
+      transition: transform var(--transition);
+      font-size: 0.75rem;
+    }
+
+    .order-items-toggle.open .chevron { transform: rotate(180deg); }
+
+    .order-items-list {
+      display: none;
+      margin-top: 8px;
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+
+    .order-items-list.open { display: block; }
+
+    .order-items-list .item-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--glass-border);
+      font-size: 0.88rem;
+    }
+
+    .order-items-list .item-row:last-child { border-bottom: none; }
+
+    .order-items-list .item-row .item-name { color: var(--text-soft); }
+    .order-items-list .item-row .item-qty  { color: var(--text-muted); }
+    .order-items-list .item-row .item-price { color: var(--gold-light); font-weight: 600; }
+
+    /* Card footer / note */
+    .order-note {
+      margin-top: 14px;
+      padding: 10px 14px;
+      background: rgba(255,255,255,0.03);
+      border-left: 2px solid var(--gold);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      font-size: 0.83rem;
+      color: var(--text-muted);
+    }
+
+    /* Status dropdown */
+    .status-dropdown {
+      position: relative;
+      display: inline-block;
+    }
+
+    .status-select {
+      appearance: none;
+      padding: 6px 30px 6px 14px;
+      border-radius: 99px;
+      font-family: 'Sarabun', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1px solid;
+      outline: none;
+      transition: opacity var(--transition);
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+    }
+
+    .status-select:hover { opacity: 0.8; }
+
+    /* Empty state */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      padding: 80px 20px;
+      text-align: center;
+    }
+
+    .empty-state .empty-icon { font-size: 3.5rem; opacity: 0.3; }
+    .empty-state h3 { color: var(--text-soft); font-size: 1.1rem; }
+    .empty-state p  { color: var(--text-muted); font-size: 0.9rem; }
+
+    /* Address text */
+    .order-address {
+      margin-top: 6px;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .order-date {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    @media (max-width: 600px) {
+      .order-card-header { flex-direction: column; align-items: flex-start; }
+      .order-header-right { align-items: flex-start; flex-direction: row; flex-wrap: wrap; }
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .timeline::before { display: none; }
+      .timeline { flex-wrap: wrap; gap: 12px; justify-content: center; }
+      .timeline-step { flex: 0 0 calc(50% - 6px); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ========== HEADER ========== -->
+  <header class="site-header">
+    <a href="index.html" class="brand">
+      <div class="logo-mark">ร</div>
+      <div class="brand-text">
+        <h1>ร้านหนังสือ รัตน์</h1>
+        <p>ระบบติดตามคำสั่งซื้อ</p>
+      </div>
+    </a>
+
+    <nav class="main-nav" aria-label="เมนูหลัก">
+      <a href="index.html">หน้าร้าน</a>
+      <a href="manage.html">จัดการหนังสือ</a>
+      <a href="shipping.html">ชำระเงิน</a>
+      <a href="order-status.html">ตรวจสอบสถานะ</a>
+      <a href="tracking.html" class="active">ติดตามพัสดุ</a>
+    </nav>
+
+    <a class="manage-link" href="index.html">← กลับหน้าร้าน</a>
+  </header>
+
+  <!-- ========== STATUS ========== -->
+  <div class="status-banner info" id="statusMessage" role="status">กำลังโหลดคำสั่งซื้อ...</div>
+
+  <!-- ========== TRACKING CONTENT ========== -->
+  <div class="tracking-page-wrapper">
+
+    <div class="page-heading">
+      <span class="eyebrow">Order Management</span>
+      <h2>ติดตาม<span>การจัดส่ง</span></h2>
+      <p>ตรวจสอบสถานะคำสั่งซื้อและอัปเดตสถานะพัสดุแต่ละรายการ</p>
+    </div>
+
+    <!-- Search & Filter -->
+    <div class="search-box">
+      <input
+        id="searchInput"
+        type="search"
+        placeholder="ค้นหาชื่อผู้รับ, เบอร์โทร หรือที่อยู่..."
+        autocomplete="off"
+        aria-label="ค้นหาคำสั่งซื้อ"
+      />
+      <button class="btn-primary" id="searchBtn">🔍 ค้นหา</button>
+    </div>
+
+    <div class="filter-row" role="group" aria-label="กรองตามสถานะ">
+      <button class="chip active" data-status="all">ทั้งหมด</button>
+      <button class="chip" data-status="pending">รอดำเนินการ</button>
+      <button class="chip" data-status="packing">กำลังแพ็ค</button>
+      <button class="chip" data-status="shipped">จัดส่งแล้ว</button>
+      <button class="chip" data-status="delivered">ส่งสำเร็จ</button>
+      <button class="chip" data-status="cancelled">ยกเลิก</button>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row" id="statsRow">
+      <div class="stat-card">
+        <div class="stat-icon">📦</div>
+        <div class="stat-value" id="statTotal">-</div>
+        <div class="stat-label">คำสั่งซื้อทั้งหมด</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">⏳</div>
+        <div class="stat-value" id="statPending">-</div>
+        <div class="stat-label">รอดำเนินการ</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🚚</div>
+        <div class="stat-value" id="statShipped">-</div>
+        <div class="stat-label">จัดส่งแล้ว</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">✅</div>
+        <div class="stat-value" id="statDelivered">-</div>
+        <div class="stat-label">ส่งสำเร็จ</div>
+      </div>
+    </div>
+
+    <!-- Orders List -->
+    <div class="orders-list" id="ordersList"></div>
+
+  </div>
+
+  <!-- ========== FOOTER ========== -->
+  <footer class="site-footer">
+    <div class="footer-brand">
+      <div class="logo-mark">ร</div>
+      <strong>ร้านหนังสือ รัตน์</strong>
+    </div>
+    <p>© 2026 ร้านหนังสือ รัตน์ · ติดตามพัสดุ</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
+  <script type="module" src="tracking.js"></script>
+</body>
+</html>

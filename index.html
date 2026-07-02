@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="ร้านหนังสือ รัตน์ — คัดสรรหนังสือดีเพื่อทุกไลฟ์สไตล์ สั่งซื้อออนไลน์ จัดส่งทั่วไทย" />
+  <title>ร้านหนังสือ รัตน์ | หนังสือดีสำหรับทุกคน</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- ========== HEADER ========== -->
+  <header class="site-header">
+    <a href="index.html" class="brand">
+      <div class="logo-mark">ร</div>
+      <div class="brand-text">
+        <h1>ร้านหนังสือ รัตน์</h1>
+        <p>คัดสรรหนังสือดี เพื่อการอ่านที่คุณรัก</p>
+      </div>
+    </a>
+
+    <button class="nav-toggle" id="navToggle" aria-label="เปิด/ปิดเมนู" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+
+    <nav class="main-nav" aria-label="เมนูหลัก">
+      <a href="#books" class="active">หนังสือ</a>
+      <a href="manage.html">จัดการหนังสือ</a>
+      <a href="shipping.html">ชำระเงิน</a>
+      <a href="order-status.html">ตรวจสอบสถานะ</a>
+      <a href="tracking.html">ติดตามพัสดุ</a>
+    </nav>
+
+    <div class="top-actions">
+      <div class="cart-badge" id="cartBadge" role="status" aria-live="polite">
+        <span>🛒</span>
+        <span class="cart-count-bubble" id="cartCount">0</span>
+        <span class="cart-total-label" id="cartTotal">0 บาท</span>
+      </div>
+      <a class="checkout-link" href="shipping.html">ชำระเงิน →</a>
+    </div>
+  </header>
+
+  <!-- ========== STATUS ========== -->
+  <div class="status-banner info" id="statusMessage" role="status">กำลังเชื่อมต่อ Supabase...</div>
+
+  <!-- ========== HERO ========== -->
+  <section class="hero-section" aria-label="ส่วนหัว">
+    <div class="hero-copy">
+      <span class="eyebrow">เลือกอ่าน เลือกสั่ง เลือกสนุก</span>
+      <h2>หนังสือที่ใช่<br/><span>สำหรับทุกไลฟ์สไตล์</span></h2>
+      <p class="hero-desc">ค้นหาหนังสือยอดนิยมจากทุกหมวดหมู่ พร้อมโปรโมชั่นที่คัดสรรเพื่อคุณโดยเฉพาะ จัดส่งทั่วประเทศไทย</p>
+
+      <div class="hero-search">
+        <span class="search-icon">🔍</span>
+        <input
+          id="searchInput"
+          type="search"
+          placeholder="ค้นหาหนังสือหรือผู้เขียน..."
+          aria-label="ค้นหาหนังสือ"
+          autocomplete="off"
+        />
+      </div>
+
+      <div class="hero-tags" role="group" aria-label="หมวดหมู่">
+        <button class="chip active" data-category="all">ทั้งหมด</button>
+        <button class="chip" data-category="นวนิยาย">นวนิยาย</button>
+        <button class="chip" data-category="พัฒนาตัวเอง">พัฒนาตัวเอง</button>
+        <button class="chip" data-category="อาหาร">อาหาร</button>
+        <button class="chip" data-category="ศิลปะ">ศิลปะ</button>
+        <button class="chip" data-category="สัมภาษณ์">สัมภาษณ์</button>
+      </div>
+    </div>
+
+    <div class="hero-preview" aria-hidden="true">
+      <div class="hero-card">
+        <span class="hero-label">หนังสือขายดี</span>
+        <h3>พงศาวดารแห่งความฝัน</h3>
+        <p class="product-author">โดย สิริพงศ์ ธนศักดิ์</p>
+        <p class="hero-description">นิยายแฟนตาซีที่เล่าเรื่องอย่างลึกซึ้ง พร้อมภาพปกสวยงาม ติดอันดับขายดีตลอดกาล</p>
+        <div class="hero-meta">พร้อมจัดส่งทันที</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== MAIN CONTENT ========== -->
+  <main class="container" id="books">
+    <section class="products-section" aria-label="รายการหนังสือ">
+      <div class="section-header">
+        <h2>หนังสือ<span>แนะนำ</span></h2>
+      </div>
+      <div class="products-grid" id="productGrid" role="list"></div>
+    </section>
+
+    <aside class="cart-panel" aria-label="ตะกร้าหนังสือ">
+      <h2>
+        <div class="cart-icon" aria-hidden="true">🛒</div>
+        ตะกร้าหนังสือ
+      </h2>
+      <div id="cartItems" class="cart-items">
+        <p class="empty-cart">ยังไม่มีสินค้าในตะกร้า</p>
+      </div>
+      <div class="cart-footer">
+        <div class="cart-total-row">
+          <span class="total-label">รวมทั้งหมด</span>
+          <span class="total-value" id="cartFooterTotal">0 บาท</span>
+        </div>
+        <button id="checkoutButton" class="checkout-button" disabled>ไปหน้าชำระเงิน →</button>
+      </div>
+    </aside>
+  </main>
+
+  <!-- ========== FOOTER ========== -->
+  <footer class="site-footer">
+    <div class="footer-brand">
+      <div class="logo-mark">ร</div>
+      <strong>ร้านหนังสือ รัตน์</strong>
+    </div>
+    <div class="footer-links">
+      <a href="#books">หนังสือ</a>
+      <a href="manage.html">จัดการ</a>
+      <a href="shipping.html">ชำระเงิน</a>
+    </div>
+    <p>© 2026 ร้านหนังสือ รัตน์ · อ่านสนุกทุกเล่ม</p>
+  </footer>
+
+  <script src="supabase.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="จัดการหนังสือ — เพิ่ม แก้ไข ลบหนังสือในระบบ ร้านหนังสือ รัตน์" />
+  <title>จัดการหนังสือ | ร้านหนังสือ รัตน์</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- ========== HEADER ========== -->
+  <header class="site-header">
+    <a href="index.html" class="brand">
+      <div class="logo-mark">ร</div>
+      <div class="brand-text">
+        <h1>ร้านหนังสือ รัตน์</h1>
+        <p>ระบบจัดการสินค้า</p>
+      </div>
+    </a>
+
+    <nav class="main-nav" aria-label="เมนูหลัก">
+      <a href="index.html">หน้าร้าน</a>
+      <a href="manage.html" class="active">จัดการหนังสือ</a>
+      <a href="shipping.html">ชำระเงิน</a>
+      <a href="order-status.html">ตรวจสอบสถานะ</a>
+      <a href="tracking.html">ติดตามพัสดุ</a>
+    </nav>
+
+    <a class="manage-link" href="index.html">← กลับหน้าร้าน</a>
+  </header>
+
+  <!-- ========== STATUS ========== -->
+  <div class="status-banner info" id="statusMessage" role="status">กำลังโหลดข้อมูลสินค้า...</div>
+
+  <!-- ========== MAIN ========== -->
+  <main class="container admin-container" style="padding-top:28px;">
+
+    <section class="admin-panel">
+      <h2>📝 ฟอร์มเพิ่ม / แก้ไขหนังสือ</h2>
+      <form id="productForm">
+        <input type="hidden" id="productId" />
+
+        <div class="form-group">
+          <label for="productName">ชื่อหนังสือ</label>
+          <input id="productName" type="text" required placeholder="เช่น พงศาวดารแห่งความฝัน" />
+        </div>
+
+        <div class="form-group">
+          <label for="productAuthor">ผู้เขียน</label>
+          <input id="productAuthor" type="text" placeholder="เช่น สิริพงศ์ ธนศักดิ์" />
+        </div>
+
+        <div class="form-group">
+          <label for="productCategory">หมวดหมู่</label>
+          <input id="productCategory" type="text" placeholder="เช่น นวนิยาย, พัฒนาตัวเอง" />
+        </div>
+
+        <div class="form-group">
+          <label for="productDescription">คำอธิบาย</label>
+          <textarea id="productDescription" rows="3" required placeholder="คำอธิบายสั้น ๆ เกี่ยวกับหนังสือ"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="productPrice">ราคา (บาท)</label>
+          <input id="productPrice" type="number" min="0" required placeholder="เช่น 320" />
+        </div>
+
+        <div class="form-group">
+          <label for="productImage">ภาพ / ชื่อแสดง</label>
+          <input id="productImage" type="text" placeholder="URL รูปภาพหรือชื่อย่อ" />
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-primary">💾 บันทึกหนังสือ</button>
+          <button type="button" id="cancelEdit" class="btn-ghost">ยกเลิก</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="products-section">
+      <h2>📚 รายการหนังสือในระบบ</h2>
+      <div class="table-wrapper">
+        <table class="admin-table" id="productTable">
+          <thead>
+            <tr>
+              <th>ชื่อหนังสือ</th>
+              <th>ผู้เขียน</th>
+              <th>หมวดหมู่</th>
+              <th>ราคา</th>
+              <th>การกระทำ</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td colspan="5" style="text-align:center;color:var(--text-muted);">กำลังโหลด...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========== FOOTER ========== -->
+  <footer class="site-footer">
+    <div class="footer-brand">
+      <div class="logo-mark">ร</div>
+      <strong>ร้านหนังสือ รัตน์</strong>
+    </div>
+    <p>© 2026 ร้านหนังสือ รัตน์ · ระบบจัดการหนังสือ</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
+  <script type="module" src="manage.js"></script>
+</body>
+</html>
